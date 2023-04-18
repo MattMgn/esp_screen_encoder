@@ -1,0 +1,60 @@
+#include <Arduino.h>
+
+const int encoderPinA = 0;
+const int encoderPinB = 2;
+const int buttonPin = 21;
+
+volatile int lastEncoded = 0;
+volatile long encoderValue = 0;
+
+long readEncoderValue(void){
+    return encoderValue/4;
+}
+
+boolean isButtonPushDown(void){
+  if(!digitalRead(buttonPin)){
+    delay(5);
+    if(!digitalRead(buttonPin))
+      return true;
+  }
+  return false;
+}
+
+void updateEncoder()
+{
+  int MSB = digitalRead(encoderPinA);
+  int LSB = digitalRead(encoderPinB);
+
+  int encoded = (MSB << 1) | LSB; //converting the 2 pin value to single number
+  int sum  = (lastEncoded << 2) | encoded; //adding it to the previous encoded value
+
+  if(sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011)
+    encoderValue++;
+  if(sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000)
+    encoderValue --;
+
+  lastEncoded = encoded;
+}
+
+void setup()
+{
+  Serial.begin(115200);
+
+  pinMode(encoderPinA, INPUT_PULLUP);
+  pinMode(encoderPinB, INPUT_PULLUP);
+  pinMode(buttonPin, INPUT_PULLUP);
+
+  attachInterrupt(encoderPinA, updateEncoder, CHANGE);
+  attachInterrupt(encoderPinB, updateEncoder, CHANGE);
+}
+
+void loop(){
+  //Do stuff here
+
+  if(isButtonPushDown()){
+    Serial.println("you push button down!!!");
+  }
+
+  Serial.println(readEncoderValue());
+}
+

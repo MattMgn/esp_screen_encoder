@@ -1,0 +1,14 @@
+#include <Arduino.h>
+#include "Arduino_menu.h"
+
+// WARNING: need to set SPI pin in gfx() constructor
+// also SPI frequency in gfx.begin
+// and encoder pin in menuMgr.initForEncoder()
+
+void setup() {
+    setupMenu();
+}
+
+void loop() {
+    taskManager.runLoop();
+}
